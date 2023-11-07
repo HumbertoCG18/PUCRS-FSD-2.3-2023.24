@@ -45,7 +45,7 @@ begin
         en <= '0';
         j1 <= '0';
         j2 <= '0';
-        init_time <= "00000100"; -- Defina o tempo inicial conforme necessário
+        init_time <= "00000000"; -- Defina o tempo inicial conforme necess�rio
 
         wait for 10 ns;
         reset <= '0';
@@ -56,7 +56,7 @@ begin
         init_time <= x"20"; -- Inicializa com 20 minutos
         wait for 10 ns;
         load <= '0';
-        j1 <= '1'; -- Jogador 1 começa
+        j1 <= '1'; -- Jogador 1 come�a
         wait for 120 ns;
         j1 <= '0';
         j2 <= '1'; -- Jogador 2 joga

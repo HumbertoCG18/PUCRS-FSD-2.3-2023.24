@@ -1,93 +1,95 @@
 library IEEE;
 use ieee.std_logic_1164.all;
-library ieee;
 use ieee.std_logic_unsigned.all;
 library work;
 
 entity relogio_xadrez is
-    port( 
-        clock, reset, load, en : in std_logic;
+    port (
+        reset : in std_logic;
+        clock : in std_logic;
+        load : in std_logic;
+        init_time : in std_logic_vector(7 downto 0);
         j1, j2 : in std_logic;
         contj1, contj2 : out std_logic_vector(15 downto 0);
         winJ1, winJ2 : out std_logic
     );
 end relogio_xadrez;
 
-architecture relogio_xadrez of relogio_xadrez is
-    -- DECLARACAO DOS ESTADOS
-    type states is (EA, PE, J1Joga, J2Joga, J1Ganha, J2Ganha, Empate);
-    signal estado_atual, prox_estado : states;
-    signal conta_tempo, tempo_anterior, vetor : integer := 0;
-    signal tempo_j1, tempo_j2 : integer := 0;
-    signal cont_temp1, cont_temp2 : std_logic_vector(15 downto 0);
+architecture Behavioral of relogio_xadrez is
+    signal en1, en2 : std_logic := '0'; -- Sinais de habilitação para temporizadores 1 e 2
+    signal state : std_logic_vector(1 downto 0) := "00"; -- Define os estados da FSM
+    signal timeout1, timeout2 : std_logic := '0'; -- Sinais para indicar timeout de jogadores
+
+    -- Declare outros sinais internos necessários aqui
+
 begin
-
-    temporizador1 : entity work.temporizador port map (
-        clock => clock,
-        reset => reset,
-        load  => load,
-        en    => en,
-        init_time => x"00",  -- Defina o valor inicial conforme necessário
-        cont  => cont_temp1
-    );
-
-    temporizador2 : entity work.temporizador port map (
-        clock => clock,
-        reset => reset,
-        load  => load,
-        en    => en,
-        init_time => x"00",  -- Defina o valor inicial conforme necessário
-        cont  => cont_temp2
-    );
-
-    process (clock, reset)
+    process (reset, clock)
     begin
         if reset = '1' then
-            estado_atual <= EA;
-            prox_estado  <= EA;
-            tempo_j1 <= 0;
-            tempo_j2 <= 0;
+            -- Inicialize os sinais e a lógica necessária para o estado inicial aqui
+            en1 <= '0';
+            en2 <= '0';
+            state <= "00";
+            timeout1 <= '0';
+            timeout2 <= '0';
         elsif rising_edge(clock) then
-            estado_atual <= prox_estado;
-
-            -- Lógica de transição de estados
-            case estado_atual is
-                when EA =>
-                    prox_estado <= PE;
-                when PE =>
+            -- Implemente a lógica da FSM aqui
+            case state is
+                when "00" =>
+                    -- Estado inicial
+                    if load = '1' then
+                        -- Inicia a contagem dos temporizadores
+                        en1 <= '1';
+                        en2 <= '1';
+                        state <= "01";
+                    end if;
+                when "01" =>
+                    -- Aguardando a jogada do Jogador 1
                     if j1 = '1' then
-                        prox_estado <= J1Joga;
-                        tempo_j1 <= cont_temp1;
-                        tempo_j2 <= 0;
-                    elsif j2 = '1' then
-                        prox_estado <= J2Joga;
-                        tempo_j1 <= 0;
-                        tempo_j2 <= cont_temp2;
-                    else
-                        prox_estado <= PE;
+                        -- Jogador 1 iniciou sua jogada
+                        en1 <= '0';
+                        state <= "10";
+                    elsif timeout1 = '1' then
+                        -- Timeout do Jogador 1
+                        en1 <= '0';
+                        state <= "11";
                     end if;
-                when J1Joga =>
-                    if tempo_j1 = 0 then
-                        prox_estado <= J2Ganha;
-                    else
-                        prox_estado <= J1Joga;
+                when "10" =>
+                    -- Aguardando a jogada do Jogador 2
+                    if j2 = '1' then
+                        -- Jogador 2 iniciou sua jogada
+                        en2 <= '0';
+                        state <= "01";
+                    elsif timeout2 = '1' then
+                        -- Timeout do Jogador 2
+                        en2 <= '0';
+                        state <= "11";
                     end if;
-                when J2Joga =>
-                    if tempo_j2 = 0 then
-                        prox_estado <= J1Ganha;
-                    else
-                        prox_estado <= J2Joga;
-                    end if;
-                when J1Ganha =>
-                    prox_estado <= EA;
-                when J2Ganha =>
-                    prox_estado <= EA;
-                when Empate =>
-                    prox_estado <= EA;
+                when "11" =>
+                    -- Jogo encerrado por timeout de um jogador
+                    null; -- Pode adicionar lógica adicional se necessário
             end case;
         end if;
     end process;
 
+    -- Instancie os módulos temporizadores aqui
+    temporizador_1 : entity work.temporizador port map (
+        clock => clock,
+        reset => reset,
+        load => load,
+        en => en1,
+        init_time => init_time,
+        cont => contj1
+    );
+
+    temporizador_2 : entity work.temporizador port map (
+        clock => clock,
+        reset => reset,
+        load => load,
+        en => en2,
+        init_time => init_time,
+        cont => contj2
+    );
     process (estado_atual, cont_temp1, cont_temp2, j1, j2)
     begin
         case estado_atual is
@@ -109,4 +111,4 @@ begin
         contj2 <= cont_temp2;
     end process;
 
-end relogio_xadrez;
+end Behavioral;

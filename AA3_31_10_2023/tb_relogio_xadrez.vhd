@@ -45,7 +45,7 @@ begin
         en <= '0';
         j1 <= '0';
         j2 <= '0';
-        init_time <= "00000000"; -- Defina o tempo inicial conforme necessário
+        init_time <= "00000100"; -- Defina o tempo inicial conforme necessário
 
         wait for 10 ns;
         reset <= '0';

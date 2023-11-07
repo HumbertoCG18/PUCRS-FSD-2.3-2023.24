@@ -1,14 +1,17 @@
+--------------------------------------------------------------------------------
+-- Temporizador decimal do cronometro de xadrez
+-- Fernando Moraes - 25/out/2023
+--------------------------------------------------------------------------------
 library IEEE;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 library work;
 
 entity dec_counter is
-    port( 
-        clock, reset, load, en : in std_logic;
-        first_value : in std_logic_vector(3 downto 0);
-        limit       : in std_logic_vector(3 downto 0);
-        cont        : out std_logic_vector(3 downto 0)
+    port( clock, reset, load, en : in std_logic;
+          first_value : in  std_logic_vector(3 downto 0);
+          limit       : in  std_logic_vector(3 downto 0);
+          cont        : out std_logic_vector(3 downto 0)
     );
 end dec_counter;
 
@@ -30,6 +33,7 @@ begin
                 else -- caso seja qualquer valor maior que zero, ira decrementar em 1
                     cont_int <= cont_int - 1;
                 end if;
+         
             end if;
         end if;
     end process;
