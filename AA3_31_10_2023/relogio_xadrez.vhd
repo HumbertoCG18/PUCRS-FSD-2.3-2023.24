@@ -1,4 +1,5 @@
 library IEEE;
+library ieee;
 use ieee.std_logic_1164.all;
 use ieee.std_logic_unsigned.all;
 library work;
@@ -29,8 +30,7 @@ begin
     j2_int <= j2;
     init_time_int <= init_time;
 
-    uut_temporizador : entity work.temporizador
-        port map (
+    contador1 : entity work.temporizador port map (
             clock => clock_int,
             reset => reset_int,
             load => load_int,
@@ -39,8 +39,7 @@ begin
             cont => contj1_int
         );
 
-    uut_temporizador2 : entity work.temporizador
-        port map (
+    contador2 : entity work.temporizador port map (
             clock => clock_int,
             reset => reset_int,
             load => load_int,
