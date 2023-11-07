@@ -1,3 +1,5 @@
+wave add /tb_relogio_xadrez/UUT/*
+
 onerror {resume}
 quietly WaveActivateNextPane {} 0
 add wave -noupdate /tb/reset

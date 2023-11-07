@@ -11,6 +11,8 @@ architecture test of tb_relogio_xadrez is
     signal init_time : std_logic_vector(7 downto 0);
     signal contj1, contj2 : std_logic_vector(15 downto 0);
     signal winJ1, winJ2 : std_logic;
+    signal partida_iniciada : boolean := false;
+    signal partida_encerrada : boolean := false;
 begin
     uut: entity work.relogio_xadrez
         port map (
@@ -57,15 +59,23 @@ begin
         wait for 10 ns;
         load <= '0';
         j1 <= '1'; -- Jogador 1 começa
-        wait for 120 ns;
-        j1 <= '0';
-        j2 <= '1'; -- Jogador 2 joga
-        wait for 120 ns;
-        j2 <= '0';
-        j1 <= '1'; -- Jogador 1 joga
-        wait for 240 ns;
-        j1 <= '0';
-        j2 <= '1'; -- Jogador 2 joga
+        partida_iniciada <= true;
+        
+        partida : process
+        begin
+            if partida_iniciada then
+                wait until contj1 = "0000000000000100" or contj2 = "0000000000000100";
+                if contj1 = "0000000000000100" then
+                    winJ1 <= '1';
+                else
+                    winJ2 <= '1';
+                end if;
+                partida_encerrada <= true;
+            end if;
+            wait;
+        end process;
+
+        wait until partida_encerrada = true;
         wait;
     end process;
 end test;
