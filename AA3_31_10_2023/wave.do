@@ -1,4 +1,4 @@
-wave add /tb_relogio_xadrez/UUT/*
+add wave /tb/UUT/*
 
 onerror {resume}
 quietly WaveActivateNextPane {} 0
