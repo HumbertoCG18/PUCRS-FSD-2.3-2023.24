@@ -27,7 +27,7 @@ begin
         load  => en1,
         en    => en2,
         first_value => init_time(3 downto 0),
-        limit => "0000",
+        limit => x"9",
         cont  => segL
     );
 
@@ -37,7 +37,7 @@ begin
         load  => en2,
         en    => en3,
         first_value => init_time(7 downto 4),
-        limit => "0101",
+        limit => x"5",
         cont  => segH
     );
 
@@ -47,7 +47,7 @@ begin
         load  => en3,
         en    => en4,
         first_value => "0100", -- 4 minutos
-        limit => "0011",
+        limit => x"9",
         cont  => minL
     );
 
@@ -57,7 +57,7 @@ begin
         load  => en4,
         en    => '1',
         first_value => "0000",
-        limit => "0010",
+        limit => x"9",
         cont  => minH
     );
 
