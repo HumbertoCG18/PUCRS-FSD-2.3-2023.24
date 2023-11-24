@@ -16,48 +16,48 @@ architecture a1 of temporizador is
     signal en1, en2, en3, en4: std_logic;
 begin
 
-    en1 <= '1' when en = '1' and not (segL = x"0" and segH = x"0" and minL = x"0" and minH = x"0") else '0';
-    en2 <= '1' when en1 = '1' and (segL = x"0") else '0';
-    en3 <= '1' when en2 = '1' and (segH = x"0") else '0';
-    en4 <= '1' when en3 = '1' and (minL = x"0") else '0';
+    en1 <= en and load;
+    en2 <= en and not load and not segL(3);
+    en3 <= en and not load and segL(3) and not minL(3);
+    en4 <= en and not load and segL(3) and minL(3) and not minH(3);
 
     sL : entity work.dec_counter port map (
         clock => clock,
         reset => reset,
-        load  => load,
-        en    => en1,
-        first_value => x"0",
-        limit => x"9",
+        load  => en1,
+        en    => en2,
+        first_value => init_time(3 downto 0),
+        limit => "0000",
         cont  => segL
     );
 
     sH : entity work.dec_counter port map (
         clock => clock,
         reset => reset,
-        load  => load,
-        en    => en2,
-        first_value => x"0",
-        limit => x"5",
+        load  => en2,
+        en    => en3,
+        first_value => init_time(7 downto 4),
+        limit => "0101",
         cont  => segH
     );
 
     mL : entity work.dec_counter port map (
         clock => clock,
         reset => reset,
-        load  => load,
-        en    => en3,
-        first_value => init_time(3 downto 0),
-        limit => x"9",
+        load  => en3,
+        en    => en4,
+        first_value => "0100", -- 4 minutos
+        limit => "0011",
         cont  => minL
     );
 
     mH : entity work.dec_counter port map (
         clock => clock,
         reset => reset,
-        load  => load,
-        en    => en4,
-        first_value => init_time(7 downto 4),
-        limit => x"9",
+        load  => en4,
+        en    => '1',
+        first_value => "0000",
+        limit => "0010",
         cont  => minH
     );
 
