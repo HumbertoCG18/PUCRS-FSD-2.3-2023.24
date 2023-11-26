@@ -17,21 +17,22 @@ entity OperacoesVetor is
 end entity OperacoesVetor;
 
 architecture Behavioral of OperacoesVetor is
-    signal soma_temp : signed(N-1 downto 0);
-    signal sub_temp : signed(N-1 downto 0);
+    signal soma_temp : signed(N downto 0); -- Adicione +1 ao tamanho para evitar estouro
+    signal sub_temp : signed(N downto 0);  -- Adicione +1 ao tamanho para evitar estouro
 begin
     process(clock, reset)
     begin
         if reset = '1' then
-            soma_temp <= (others => '0'); -- Inicializa a soma com zero no reset
-            sub_temp <= (others => '0');  -- Inicializa a subtração com zero no reset
+            soma_temp <= (others => '0');
+            sub_temp <= (others => '0');
         elsif rising_edge(clock) then
             for i in 0 to N-1 loop
-                soma_temp <= soma_temp + A(i) + B(i);  -- Soma dos elementos de A e B
-                sub_temp <= sub_temp + A(i) - B(i);   -- Subtração dos elementos de A e B
+                soma_temp <= soma_temp + ('0' & A(i)) + ('0' & B(i));  -- Soma dos elementos de A e B
+                sub_temp <= sub_temp + ('0' & A(i)) - ('0' & B(i));    -- Subtração dos elementos de A e B
             end loop;
-            C <= soma_temp; -- Atribui o resultado da soma à saída C
-            D <= sub_temp;  -- Atribui o resultado da subtração à saída D
+            
+            C <= soma_temp(N-1 downto 0);  -- Atribui o resultado da soma à saída C
+            D <= sub_temp(N-1 downto 0);   -- Atribui o resultado da subtração à saída D
         end if;
     end process;
 end architecture Behavioral;
