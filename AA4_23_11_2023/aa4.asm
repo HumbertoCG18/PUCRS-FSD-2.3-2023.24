@@ -24,7 +24,7 @@ _start:
     li $t5, 0     # Inicializa contador do loop
     
 add_sub_loop:
-    bge $t5, $t0, mult_sum_pos   # Se o contador >= tamanho do vetor, vai para multiplicação das somas
+    bge $t5, $t0, calc_sum_pos   # Se o contador >= tamanho do vetor, vai para cálculo da soma dos valores positivos
     
     lw $t6, ($t1)   # Carrega A[i]
     lw $t7, ($t2)   # Carrega B[i]
@@ -43,17 +43,17 @@ add_sub_loop:
     
     j add_sub_loop   # Loop novamente
     
-mult_sum_pos:
-    # Loop para calcular a multiplicação da soma dos valores positivos de C e D
+calc_sum_pos:
+    # Loop para calcular a soma dos valores positivos de C e D
     li $t5, 0     # Reinicia contador do loop
     li $t6, 0     # Inicializa soma dos valores positivos de C
     li $t7, 0     # Inicializa soma dos valores positivos de D
     
-mult_sum_loop:
+calc_sum_loop:
     bge $t5, $t0, end_program   # Se o contador >= tamanho do vetor, encerra o programa
     
-    lw $t8, C($t5)    # Carrega C[i]
-    lw $t9, D($t5)    # Carrega D[i]
+    lw $t8, ($t3)    # Carrega C[i]
+    lw $t9, ($t4)    # Carrega D[i]
     
     bgez $t8, add_c   # Se C[i] >= 0, vai para soma dos valores positivos de C
     j check_d         # Senão, verifica D[i]
@@ -64,14 +64,16 @@ add_c:
     
 check_d:
     bgez $t9, add_d     # Se D[i] >= 0, vai para soma dos valores positivos de D
-    increment         # Senão, incrementa contador e continua o loop
+    increment           # Senão, incrementa contador e continua o loop
     
 add_d:
     add $t7, $t7, $t9   # Soma de valores positivos de D
     
 increment:
     addi $t5, $t5, 1   # Incrementa contador do loop
-    j mult_sum_loop     # Loop novamente
+    addi $t3, $t3, 4   # Avança para o próximo elemento em C
+    addi $t4, $t4, 4   # Avança para o próximo elemento em D
+    j calc_sum_loop     # Loop novamente
     
 end_program:
     # Calcula a multiplicação das somas dos valores positivos de C e D
