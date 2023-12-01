@@ -3,7 +3,7 @@ A: .word -5, 7, 8, 9, -3, 1, -6, 2
 B: .word 4, 2, 9, -7, 2, -1, -6, 8
 C: .word 0, 0, 0, 0, 0, 0, 0, 0
 D: .word 0, 0, 0, 0, 0, 0, 0, 0
-MP: .word 0, 0, 0, 0, 0, 0, 0, 0
+MP: .word 0
 n: .word 8
 
 .text
@@ -17,61 +17,57 @@ inicio:
     la $t2, B
     la $t3, C
     la $t4, D
-    la $t5, MP
 
-    # Loop para adição, subtração e multiplicação de vetores A e B
-    xor $t6, $t6, $t6     # Inicializa i
+    # Loop para adição e subtração de vetores A e B
+    xor $t5, $t5, $t5     # Inicializa i
 
-loop:
-    lw $t7, 0($t1)    # Carrega A[i]
-    lw $t8, 0($t2)    # Carrega B[i]
+add_sub_loop:
+    lw $t6, 0($t1)    # Carrega A[i]
+    lw $t7, 0($t2)    # Carrega B[i]
 
-    add $t9, $t7, $t8    # Adiciona A[i] + B[i]
-    sub $t10, $t7, $t8    # Subtrai A[i] - B[i]
-    mul $t11, $t7, $t8    # Multiplica A[i] * B[i]
+    add $t8, $t6, $t7    # Adiciona A[i] + B[i]
+    sub $t9, $t6, $t7    # Subtrai A[i] - B[i]
 
-    sw $t9, 0($t3)    # Armazena resultado da adição em C[i]
-    sw $t10, 0($t4)    # Armazena resultado da subtração em D[i]
-    sw $t11, 0($t5)    # Armazena resultado da multiplicação em MP[i]
+    sw $t8, 0($t3)    # Armazena resultado da adição em C[i]
+    sw $t9, 0($t4)    # Armazena resultado da subtração em D[i]
 
     addi $t1, $t1, 4    # Avança para o próximo elemento em A
     addi $t2, $t2, 4    # Avança para o próximo elemento em B
     addi $t3, $t3, 4    # Avança para o próximo elemento em C
     addi $t4, $t4, 4    # Avança para o próximo elemento em D
-    addi $t5, $t5, 4    # Avança para o próximo elemento em MP
-    addi $t6, $t6, 1    # Incrementa contador do loop
-    blt $t6, $t0, loop    # Se o i < n, retorna para o loop
+    addi $t5, $t5, 1    # Incrementa contador do loop
+    blt $t5, $t0, add_sub_loop    # Se o i < n, retorna para "add_sub_loop"
+    
+    # Loop para calcular a multiplicação das somas dos valores positivos de C e D
+    li $t5, 0            # Reinicializa i
+    li $t6, 0            # Reinicializa o contador da soma de C
+    li $t7, 0            # Reinicializa o contador da soma de D
 
-    # Loop para soma dos valores positivos em C
-    la $t3, C    # Reinicia a posição do C
-    xor $t6, $t6, $t6    # Reinicia o i
-    xor $t7, $t7, $t7    # Reinicia o auxiliar
-    xor $t8, $t8, $t8    # Reinicia o auxiliar
-
-loop_C:
-    lw $t7, 0($t3)    # Carrega C[i]
+calc_sum_pos_loop_C:
+    lw $t8, 0($t3)    # Carrega C[i]
     addi $t3, $t3, 4    # Avança para o próximo elemento em C
-    addi $t6, $t6, 1    # Incrementa contador do loop
-    bltz $t7, loop_C    # Se o valor é negativo, volta para loop_C
+    addi $t5, $t5, 1    # Incrementa contador do loop
+    bltz $t8, calc_sum_pos_loop_C
 
-    add $t8, $t8, $t7    # Adiciona X = X + C[i]
+    add $t6, $t6, $t8    # Adiciona soma de valores positivos de C
 
-    blt $t6, $t0, loop_C    # Se o i < n, retorna para loop_C
+    blt $t5, $t0, calc_sum_pos_loop_C    # Se o i < n, retorna para o loop de C
 
-    # Loop para soma dos valores positivos em D
-    la $t4, D    # Reinicia a posição do D
-    xor $t6, $t6, $t6    # Reinicia o i
-    xor $t7, $t7, $t7    # Reinicia o auxiliar
+    li $t5, 0            # Reinicializa i
 
-loop_D:
-    lw $t7, 0($t4)    # Carrega D[i]
+calc_sum_pos_loop_D:
+    lw $t9, 0($t4)    # Carrega D[i]
     addi $t4, $t4, 4    # Avança para o próximo elemento em D
-    addi $t6, $t6, 1    # Incrementa contador do loop
-    blt $t7, $zero, loop_D    # Se o valor é negativo, volta para loop_D
+    addi $t5, $t5, 1    # Incrementa contador do loop
+    blt $t9, $zero, calc_sum_pos_loop_D
 
-    add $t8, $t8, $t7    # Adiciona X = X + D[i]
+    add $t7, $t7, $t9    # Adiciona soma de valores positivos de D
 
-    blt $t6, $t0, loop_D    # Se o i < n, retorna para loop_D
+    blt $t5, $t0, calc_sum_pos_loop_D    # Se o i < n, retorna para o loop de D
+
+    # Calcula a multiplicação das somas
+    mul $t6, $t6, $t7      # Realiza a multiplicação das somas de C e D
+    sw $t6, MP             # Armazena o resultado na memória MP
 
 end:
     j end
