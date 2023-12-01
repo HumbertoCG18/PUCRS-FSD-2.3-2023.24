@@ -1,4 +1,3 @@
-# Definição dos vetores A, B, C e D com valores iniciais
 .data
     N:      .word 8         # Tamanho do vetor
     A:      .word 10, 20, -5, 30, 0, 0, 0, 0     # Vetor A
