@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 .data
     N:      .word 8         # Tamanho do vetor
     A:      .word 10, 20, -5, 30, 0, 0, 0, 0     # Vetor A
@@ -7,85 +6,81 @@
     D:      .word 0, 0, 0, 0, 0, 0, 0, 0         # Vetor D
     MP:     .word 0         # Variável para armazenar o resultado da multiplicação das somas dos valores positivos
 
-=======
->>>>>>> 6c9778357570014f131dbec1241c04ba4b0b4242
 .text
-.globl inicio
- 
+.globl _start
 
-inicio:		lw $t0, n	# Carrega o tamanho do vetor
+_start:
+    # Carrega o tamanho do vetor
+    lw $t0, N
     
-		# Carrega endereços dos vetores
-		la $t1, A
-		la $t2, B
-		la $t3, C
-		la $t4, D
+    # Carrega endereços dos vetores
+    la $t1, A
+    la $t2, B
+    la $t3, C
+    la $t4, D
     
-		# Loop para adição e subtração de vetores A e B
-		xor	$t5, $t5, $t5     # Inicializa i
+    # Loop para adição e subtração de vetores A e B
+    li $t5, 0     # Inicializa contador do loop
     
-add_sub_loop:   
-		lw	$t6, 0($t1)   # Carrega A[i]
-		lw	$t7, 0($t2)   # Carrega B[i]
+add_sub_loop:
+    bge $t5, $t0, calc_sum_pos   # Se o contador >= tamanho do vetor, vai para cálculo da soma dos valores positivos
     
-		add	$t8, $t6, $t7   # Adiciona A[i] + B[i]
-		sub	$t9, $t6, $t7   # Subtrai A[i] - B[i]
+    lw $t6, ($t1)   # Carrega A[i]
+    lw $t7, ($t2)   # Carrega B[i]
     
-		sw	$t8, 0($t3)   # Armazena resultado da adição em C[i]
-		sw	$t9, 0($t4)   # Armazena resultado da subtração em D[i]
+    add $t8, $t6, $t7   # Adiciona A[i] + B[i]
+    sub $t9, $t6, $t7   # Subtrai A[i] - B[i]
     
-		addi	$t1, $t1, 4   # Avança para o próximo elemento em A
-		addi	$t2, $t2, 4   # Avança para o próximo elemento em B
-		addi	$t3, $t3, 4   # Avança para o próximo elemento em C
-		addi	$t4, $t4, 4   # Avança para o próximo elemento em D
-		addi	$t5, $t5, 1   # Incrementa contador do loop
-		blt	$t5, $t0, add_sub_loop   # Se o i < n, retorna para "add_sub_loop"
-		j calc_sum_pos   # Vai para cálculo da soma dos valores positivos
-		
+    sw $t8, ($t3)   # Armazena resultado da adição em C[i]
+    sw $t9, ($t4)   # Armazena resultado da subtração em D[i]
+    
+    addi $t1, $t1, 4   # Avança para o próximo elemento em A
+    addi $t2, $t2, 4   # Avança para o próximo elemento em B
+    addi $t3, $t3, 4   # Avança para o próximo elemento em C
+    addi $t4, $t4, 4   # Avança para o próximo elemento em D
+    addi $t5, $t5, 1   # Incrementa contador do loop
+    
+    j add_sub_loop   # Loop novamente
+    
 calc_sum_pos:
-		la	$t3, C		# Reinicia a posição do C
-		la	$t4, D		# Reinicia a posição do D
-		xor	$t5, $t5, $t5	# Reinicia o i
-		xor	$t6, $t6, $t6	# Reinicia o auxiliar
-		xor	$t7, $t7, $t7	# Reinicia o auxiliar
-		xor	$t8, $t8, $t8	# Reinicia o auxiliar
-		xor	$t9, $t9, $t9	# Reinicia o auxiliar
-		
-calc_sum_loop_C:
-    		lw	$t6, 0($t3)	# Carrega C[i]
-    		addi	$t3, $t3, 4	# Avança para o próximo elemento em C
-    		addi	$t5, $t5, 1	# Incrementa contador do loop
-    		bltz	$t6, calc_sum_loop_C
-    		
-    		add	$t8, $t8, $t6	# Adiciona X = X + C[i]
-    		
-
-    		blt	$t5, $t0, calc_sum_loop_C   # Se o i < n, retorna para "add_sub_loop"
-
-		xor	$t5, $t5, $t5	# Reinicia o i
-calc_sum_loop_D:
-    		lw	$t7, 0($t4)	# Carrega D[i]
-    		addi	$t4, $t4, 4	# Avança para o próximo elemento em D
-       		addi	$t5, $t5, 1	# Incrementa contador do loop
-    		blt	$t7, 0, calc_sum_loop_D
-    		
-    		add	$t9, $t9, $t7	# Adiciona X = X + D[i]
-
-    		blt	$t5, $t0, calc_sum_loop_D	# Se o i < n, retorna para "add_sub_loop"
-    		
-
-end:	
-    # Multiplica os valores somados de C e D
-    mul $t8, $t8, $t9   # Multiplica a soma dos valores positivos de C e D
-    sw $t8, MP          # Armazena o resultado na variável MP
-
-    j end
-
-
-.data
-A: .word -5 7 8 9 -3 1 -6 2
-B: .word 4 2 9 -7 2 -1 -6 8
-C: .word 0 0 0 0 0 0 0 0
-D: .word 0 0 0 0 0 0 0 0
-MP: .word 0
-n: .word 8
+    # Loop para calcular a soma dos valores positivos de C e D
+    li $t5, 0     # Reinicia contador do loop
+    li $t6, 0     # Inicializa soma dos valores positivos de C
+    li $t7, 0     # Inicializa soma dos valores positivos de D
+    
+calc_sum_loop:
+    bge $t5, $t0, end_program   # Se o contador >= tamanho do vetor, encerra o programa
+    
+    lw $t8, ($t3)    # Carrega C[i]
+    lw $t9, ($t4)    # Carrega D[i]
+    
+    bgez $t8, add_c   # Se C[i] >= 0, vai para soma dos valores positivos de C
+    j check_d         # Senão, verifica D[i]
+    
+add_c:
+    add $t6, $t6, $t8   # Soma de valores positivos de C
+    j check_d           # Verifica D[i]
+    
+check_d:
+    bgez $t9, add_d     # Se D[i] >= 0, vai para soma dos valores positivos de D
+    increment           # Senão, incrementa contador e continua o loop
+    
+add_d:
+    add $t7, $t7, $t9   # Soma de valores positivos de D
+    
+increment:
+    addi $t5, $t5, 1   # Incrementa contador do loop
+    addi $t3, $t3, 4   # Avança para o próximo elemento em C
+    addi $t4, $t4, 4   # Avança para o próximo elemento em D
+    j calc_sum_loop     # Loop novamente
+    
+end_program:
+    # Calcula a multiplicação das somas dos valores positivos de C e D
+    mul $t8, $t6, $t7
+    
+    # Armazena o resultado da multiplicação
+    sw $t8, MP
+    
+    # Termina o programa
+    li $v0, 10
+    syscall
