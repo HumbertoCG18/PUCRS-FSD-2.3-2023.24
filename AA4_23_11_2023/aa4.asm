@@ -38,10 +38,9 @@ add_sub_loop:
     addi $t5, $t5, 1    # Incrementa contador do loop
     blt $t5, $t0, add_sub_loop    # Se o i < n, retorna para "add_sub_loop"
     
-    # Loop para calcular a multiplicação das somas dos valores positivos de C e D
+    # Loop para calcular a soma dos valores positivos de C
     li $t5, 0            # Reinicializa i
     li $t6, 0            # Reinicializa o contador da soma de C
-    li $t7, 0            # Reinicializa o contador da soma de D
 
 calc_sum_pos_loop_C:
     lw $t8, 0($t3)    # Carrega C[i]
@@ -49,11 +48,13 @@ calc_sum_pos_loop_C:
     addi $t5, $t5, 1    # Incrementa contador do loop
     bltz $t8, calc_sum_pos_loop_C
 
-    add $t6, $t6, $t8    # Adiciona soma de valores positivos de C
+    add $t6, $t6, $t8    # Adiciona valores positivos de C
 
     blt $t5, $t0, calc_sum_pos_loop_C    # Se o i < n, retorna para o loop de C
 
+    # Loop para calcular a soma dos valores positivos de D
     li $t5, 0            # Reinicializa i
+    li $t7, 0            # Reinicializa o contador da soma de D
 
 calc_sum_pos_loop_D:
     lw $t9, 0($t4)    # Carrega D[i]
@@ -61,13 +62,24 @@ calc_sum_pos_loop_D:
     addi $t5, $t5, 1    # Incrementa contador do loop
     blt $t9, $zero, calc_sum_pos_loop_D
 
-    add $t7, $t7, $t9    # Adiciona soma de valores positivos de D
+    add $t7, $t7, $t9    # Adiciona valores positivos de D
 
     blt $t5, $t0, calc_sum_pos_loop_D    # Se o i < n, retorna para o loop de D
 
-    # Calcula a multiplicação das somas
-    mul $t6, $t6, $t7      # Realiza a multiplicação das somas de C e D
-    sw $t6, MP             # Armazena o resultado na memória MP
+    # Cálculo da multiplicação das somas
+    li $t5, 0            # Reinicializa i
+    li $t9, 0            # Inicializa o acumulador da multiplicação
+
+mult_loop:
+    blt $t5, $t6, end_mult_loop    # Se i < soma de valores positivos de C, encerra o loop
+
+    add $t9, $t9, $t7    # Adiciona os valores positivos de D para a multiplicação
+    addi $t5, $t5, 1    # Incrementa contador do loop
+    j mult_loop
+
+end_mult_loop:
+    # Armazena o resultado da multiplicação
+    sw $t9, MP
 
 end:
     j end
