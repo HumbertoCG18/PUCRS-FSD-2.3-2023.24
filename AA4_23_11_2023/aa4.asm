@@ -49,7 +49,7 @@ calc_sum_pos:
     li $t7, 0     # Inicializa soma dos valores positivos de D
     
 calc_sum_loop:
-    bge $t5, $t0, end_program   # Se o contador >= tamanho do vetor, encerra o programa
+    bge $t5, $t0, multiply_sums   # Se o contador >= tamanho do vetor, vai para multiplicação das somas dos valores positivos
     
     lw $t8, ($t3)    # Carrega C[i]
     lw $t9, ($t4)    # Carrega D[i]
@@ -74,10 +74,36 @@ increment:
     addi $t4, $t4, 4   # Avança para o próximo elemento em D
     j calc_sum_loop     # Loop novamente
     
-end_program:
+multiply_sums:
     # Calcula a multiplicação das somas dos valores positivos de C e D
-    mul $t8, $t6, $t7
+    move $s0, $t6      # Coloca soma de valores positivos de C em $s0
+    move $s1, $t7      # Coloca soma de valores positivos de D em $s1
     
+    # Se B for negativo, troca o sinal
+    slti $t9, $s1, 0   # Verifica se B é negativo
+    beqz $t9, no_negate_result  # Se não for negativo, vai para multiplicação
+    
+    sub $s1, $zero, $s1   # Troca o sinal do acumulador
+
+no_negate_result:
+    # Acumula A, B vezes
+    move $t8, $zero   # Inicializa acumulador
+    
+multiply_loop:
+    beq $s1, $zero, end_multiply  # Se B vezes acabou, vai para o fim
+    
+    add $t8, $t8, $s0   # Acumula A ao acumulador
+    addi $s1, $s1, -1   # Decrementa B vezes
+    j multiply_loop      # Loop novamente
+
+end_multiply:
+    # Troca o sinal do resultado, se B for negativo
+    slti $t9, $t8, 0   # Verifica se o resultado é negativo
+    beqz $t9, store_result  # Se não for negativo, vai para armazenar o resultado
+    
+    sub $t8, $zero, $t8   # Troca o sinal do resultado
+
+store_result:
     # Armazena o resultado da multiplicação
     sw $t8, MP
     
