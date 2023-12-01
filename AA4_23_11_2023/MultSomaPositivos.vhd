@@ -1,45 +1,102 @@
-architecture Behavioral of MultSomaPositivos is
-    signal result_C, result_D : std_logic_vector(N-1 downto 0);
-    signal sumC, sumD : unsigned(N downto 0) := (others => '0');
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+
+entity MultSomaPositivos_tb is
+end entity MultSomaPositivos_tb;
+
+architecture testbench of MultSomaPositivos_tb is
+    constant N : integer := 8; -- Tamanho do vetor
+
+    signal clock_tb : std_logic := '0';
+    signal reset_tb : std_logic := '0';
+    signal A_tb, B_tb : std_logic_vector(N-1 downto 0) := (others => '0');
+    signal MS_tb : std_logic_vector(N*2-1 downto 0);
+
+    file mem_dump_file: text;
+    
+    component MultSomaPositivos
+        generic (
+            N : integer := 8
+        );
+        port (
+            clock   : in std_logic;
+            reset   : in std_logic;
+            A       : in std_logic_vector(N-1 downto 0);
+            B       : in std_logic_vector(N-1 downto 0);
+            MS      : out std_logic_vector(N*2-1 downto 0)
+        );
+    end component;
+
 begin
-    process(clock, reset)
-        variable prod : unsigned(N*2-1 downto 0) := (others => '0');
+    DUT: MultSomaPositivos
+        generic map (
+            N => N
+        )
+        port map (
+            clock => clock_tb,
+            reset => reset_tb,
+            A     => A_tb,
+            B     => B_tb,
+            MS    => MS_tb
+        );
+    
+    clock_process: process
     begin
-        if reset = '1' then
-            MS <= (others => '0');
-            sumC <= (others => '0');
-            sumD <= (others => '0');
-            result_C <= (others => '0');
-            result_D <= (others => '0');
-        elsif rising_edge(clock) then
-            -- Adição de vetores A e B
-            for i in 0 to N-1 loop
-                result_C(i) <= A(i) + B(i);
-            end loop;
+        while now < 1000 ns loop
+            clock_tb <= '0';
+            wait for 5 ns;
+            clock_tb <= '1';
+            wait for 5 ns;
+        end loop;
+        wait;
+    end process clock_process;
 
-            -- Subtração de vetores A e B
-            for i in 0 to N-1 loop
-                result_D(i) <= A(i) - B(i);
-            end loop;
+    stimulus: process
+    begin
+        reset_tb <= '1';
+        wait for 10 ns;
+        reset_tb <= '0';
+        
+        -- Inserindo valores nos vetores A e B para o teste
+        A_tb <= "10101010"; -- Altere conforme necessário
+        B_tb <= "01100110"; -- Altere conforme necessário
+        
+        wait for 100 ns;
+        wait;
+    end process stimulus;
 
-            -- Soma dos valores positivos de C
-            for i in 0 to N-1 loop
-                if result_C(i) = '1' then
-                    sumC <= sumC + to_unsigned(i, N+1);
-                end if;
-            end loop;
-
-            -- Soma dos valores positivos de D
-            for i in 0 to N-1 loop
-                if result_D(i) = '1' then
-                    sumD <= sumD + to_unsigned(i, N+1);
-                end if;
-            end loop;
-
-            -- Multiplicação das somas
-            prod := sumC * sumD;
-
-            MS <= std_logic_vector(prod); -- Resultado final da multiplicação das somas dos valores positivos
+    -- Processo de escrita do arquivo de dump
+    process
+        variable file_opened : boolean := FALSE;
+    begin
+        file_opened := FALSE;
+        wait for 0 ns;
+        
+        -- Abre o arquivo de dump
+        file_open(mem_dump_file, "mips.txt", write_mode);
+        file_opened := TRUE;
+        
+        -- Captura os valores iniciais
+        report "Início da simulação" severity note;
+        write(mem_dump_file, "Valores iniciais:");
+        write(mem_dump_file, "A_tb = " & to_string(A_tb));
+        write(mem_dump_file, "B_tb = " & to_string(B_tb));
+        
+        -- Loop para acompanhar a simulação
+        while now < 1000 ns loop
+            wait for 1 ns;
+        end loop;
+        
+        -- Captura os valores finais
+        write(mem_dump_file, "Fim da simulação:");
+        write(mem_dump_file, "MS_tb = " & to_string(MS_tb));
+        
+        -- Fecha o arquivo no final da simulação
+        if file_opened then
+            file_close(mem_dump_file);
         end if;
+        wait;
     end process;
-end architecture Behavioral;
+    
+end architecture testbench;
