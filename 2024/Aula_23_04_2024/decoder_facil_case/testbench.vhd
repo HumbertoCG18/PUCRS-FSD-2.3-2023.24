@@ -23,11 +23,11 @@ begin
 	circuito: entity work.decoder_facil
     port map
 	(
-        abc      	=> tb_abc,
-        display     => tb_display	
+        abc      	=> tb_abc, -- abc do decoder.vhdl está conectado com a "tb_abc"
+        display     => tb_display -- mesma logica do de cima	
     );
 
- -- Geração estimulos do testbench
+		 -- Geração estimulos do testbench
 	tb_abc <= 	"000",
 				"001" after 50 ns,
 				"010" after 100 ns,
