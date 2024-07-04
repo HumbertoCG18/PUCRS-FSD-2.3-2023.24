@@ -1,5 +1,5 @@
 .data
-PE: .word 0
+PE: .word 0 #Address in Data Segment: 0x10010000
 n: .word 8
 A: .word 1, 2, 3, 4, 5, 6, 7, -8
 B: .word -8, 7, -6, 5, 4, -3, 2, -1
