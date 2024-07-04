@@ -1,108 +1,52 @@
 .data
-A: .space 40       # Space for 10 integers (10 * 4 bytes)
-B: .space 40       # Space for 10 integers (10 * 4 bytes)
-C: .space 40       # Space for result vector C (10 * 4 bytes)
-D: .space 40       # Space for result vector D (10 * 4 bytes)
-PE: .word 0        # Storage for scalar product result
+PE: .word 0
+n: .word 8
+A: .word 1, 2, 3, 4, 5, 6, 7, -8
+B: .word -8, 7, -6, 5, 4, -3, 2, -1
+C: .space 32  # 8 words * 4 bytes per word
+D: .space 32  # 8 words * 4 bytes per word
 
 .text
 .globl main
 
 main:
-    # Initialize random seed (optional, if needed)
-    li $v0, 42        # syscall 42 for random integer
-    syscall
+    # Initialize PE to 0
+    la $t0, PE        # Load address of PE into $t0
+    li $t1, 0         # Load immediate 0 into $t1
+    sw $t1, 0($t0)    # Store 0 into PE
 
-    # Loop to initialize arrays A and B with 10 elements each
-    li $t0, 0         # Initialize index i = 0
-    li $t1, 10        # Number of elements in arrays A and B
+    # Load the number of elements (n)
+    la $t1, n         # Load address of n into $t1
+    lw $t1, 0($t1)    # Load value of n into $t1
 
-init_loop:
-    bge $t0, $t1, init_done   # Exit loop if i >= n
+    # Load base addresses of arrays A and B
+    la $t2, A         # Load address of A into $t2
+    la $t3, B         # Load address of B into $t3
 
-    # Generate random integer for A[i]
-    li $v0, 42        # syscall 42 for random integer
-    syscall
-    move $t2, $v0     # Move random value to $t2
+    # Initialize loop counter i to 0
+    li $t4, 0         # Load immediate 0 into $t4 (i = 0)
 
-    # Store random value in A[i]
-    sw $t2, A($t0)    # A[i] = random value
+loop_main:
+    beq $t4, $t1, end # if i == n, exit loop
 
-    # Generate random integer for B[i]
-    li $v0, 42        # syscall 42 for random integer
-    syscall
-    move $t3, $v0     # Move random value to $t3
+    # Load elements A[i] and B[i]
+    lw $t5, 0($t2)    # Load A[i] into $t5
+    lw $t6, 0($t3)    # Load B[i] into $t6
 
-    # Store random value in B[i]
-    sw $t3, B($t0)    # B[i] = random value
+    # Multiply A[i] and B[i] and accumulate in PE
+    mul $t7, $t5, $t6 # t7 = A[i] * B[i]
+    la $t0, PE        # Load address of PE into $t0
+    lw $t8, 0($t0)    # Load current PE into $t8
+    add $t8, $t8, $t7 # PE = PE + (A[i] * B[i])
+    sw $t8, 0($t0)    # Store updated PE back into memory
 
-    addi $t0, $t0, 1  # Increment index i
-    j init_loop       # Jump back to loop
+    # Increment array pointers and loop counter
+    addi $t2, $t2, 4  # Move to the next element in A
+    addi $t3, $t3, 4  # Move to the next element in B
+    addi $t4, $t4, 1  # i++
 
-init_done:
-    # Call subroutines for vector addition, subtraction, and scalar product
-    jal add_vectors   # Call subroutine for vector addition
-    jal sub_vectors   # Call subroutine for vector subtraction
-    jal scalar_product  # Call subroutine for scalar product (Specification 1)
+    j loop_main       # Jump back to the beginning of the loop
 
-    # Exit program
-    li $v0, 10        # syscall 10 to exit program
-    syscall
-
-# Subroutine to add vectors A and B
-add_vectors:
-    li $t0, 0         # Initialize index i = 0
-
-add_loop:
-    bge $t0, $t1, add_done   # Exit loop if i >= n
-
-    lw $t2, A($t0)    # Load A[i] into $t2
-    lw $t3, B($t0)    # Load B[i] into $t3
-    add $t4, $t2, $t3  # C[i] = A[i] + B[i]
-    sw $t4, C($t0)    # Store result in C[i]
-
-    addi $t0, $t0, 1  # Increment index i
-    j add_loop        # Jump back to loop
-
-add_done:
-    jr $ra            # Return from subroutine
-
-# Subroutine to subtract vectors A and B
-sub_vectors:
-    li $t0, 0         # Initialize index i = 0
-
-sub_loop:
-    bge $t0, $t1, sub_done   # Exit loop if i >= n
-
-    lw $t2, A($t0)    # Load A[i] into $t2
-    lw $t3, B($t0)    # Load B[i] into $t3
-    sub $t4, $t2, $t3  # D[i] = A[i] - B[i]
-    sw $t4, D($t0)    # Store result in D[i]
-
-    addi $t0, $t0, 1  # Increment index i
-    j sub_loop        # Jump back to loop
-
-sub_done:
-    jr $ra            # Return from subroutine
-
-# Subroutine to compute scalar product of vectors C and D (Specification 1)
-scalar_product:
-    li $t0, 0         # Initialize index i = 0
-    li $t5, 0         # Initialize product accumulator
-
-scalar_loop:
-    bge $t0, $t1, scalar_done   # Exit loop if i >= n
-
-    lw $t2, C($t0)    # Load C[i] into $t2
-    lw $t3, D($t0)    # Load D[i] into $t3
-    mul $t4, $t2, $t3  # $t4 = C[i] * D[i]
-    add $t5, $t5, $t4  # Accumulate product
-
-    addi $t0, $t0, 1  # Increment index i
-    j scalar_loop     # Jump back to loop
-
-scalar_done:
-    # Store result in PE (scalar product)
-    sw $t5, PE
-
-    jr $ra            # Return from subroutine
+end:
+    # End of program
+    j end             # Infinite loop to end the program
