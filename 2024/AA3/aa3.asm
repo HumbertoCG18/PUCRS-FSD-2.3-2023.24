@@ -1,96 +1,102 @@
-#T4 ESPECIFICAÃ‡ÃƒO 1.
-
-# t0 = PE;
-# t1 = n;
-# t2 = A[];
-# t3 = B[];
-# t4 = i;
-# t5 = j;
-# t6 = A[i];
-# t7 = B[i];
-# a0 = sempre 0;
-# a1 = 'B[i]' originais;
-# a2 = 'A[i]' originais;
+.data
+PE: .word 0       # Address in Data Segment: 0x10010000
+n: .word 8
+A: .word 1, 2, 3, 4, 5, 6, 7, -8
+B: .word -8, 7, -6, 5, 4, -3, 2, -1
+C: .space 32  # 8 words * 4 bytes per word
+D: .space 32  # 8 words * 4 bytes per word
 
 .text
+.globl main
 
-.global
+main:
+    # Inicializa PE com 0
+    la $t0, PE        # Carrega o endereço de PE em $t0
+    li $t1, 0         # Carrega o valor 0 em $t1
+    sw $t1, 0($t0)    # Armazena 0 em PE
 
+    # Carrega o número de elementos (n)
+    la $t1, n         # Carrega o endereço de n em $t1
+    lw $t1, 0($t1)    # Carrega o valor de n em $t1
 
-begin:		
-		la $t0, PE 		# t0 carrega endereco de PE;
-		lw $t0, 0($t0)		# t0 = 0;	
-		la $t1, n		# t1 carrega endereco de n;
-		lw $t1,0($t1)		# t1 = 8;
-		
-		la $t2, A		# t2 carrega endereco de A[0];
-		la $t3, B		# t3 carrega endereco de B[0];
-		
-		xor $t4, $t4, $t4	# t4 = i = 0;
-		xor $a0,$a0,$a0 	# a0 = 0;
-		
-loop_main:	
-			xor $t5,$t5,$t5				# t5 = j = 0;
-			lw $t6, 0($t3)				# t6 = B[i]; 
-			lw $t7, 0($t2)				# t7 = A[i];
-			blt $t4, $t1, loop_multiply 		# if(i < n) multiply;
-			sw $t0, PE				# salva o que esta em t0 no PE;
-			j end					# fim
-				
+    # Carrega os endereços base dos vetores A e B
+    la $t2, A         # Carrega o endereço de A em $t2
+    la $t3, B         # Carrega o endereço de B em $t3
 
-loop_multiply:
-			lw $a1, 0($t3)				# a1  salva B[i] original; 
-			lw $a2, 0($t2)				# a2 salva A[i] original; 
-			blt $t5, $t6, incremento_multiply	# if(j<B[i]) incremento_multiplay;
-			blt $t6, $t5, inverte_b			# if(B[i] < j) inverte B;
-			j incremento_main			# incrementa enderecos e o 'i';
-		
-inverte_b:	
-			sub $t6 , $a0, $t6		# t6 = 0 - t6;
-			j loop_multiply			# vai pra multiplicacao;
-inverte_a:	
-			sub $t7 , $a0, $t7		# t7 = 0 - t7;
-			j loop_multiply			# vai pra multiplicacao;
-						
-		
-verifica_a:		
-			blt $a2, $a0, incremento_soma_negativos		# se chegou aqui entao B[i] original é negativo, se for verdade entao A[i] original tambem é negativo;
-			j incremento_subtracao				# se anterior falhar entao os sinais sao opostos e causa uma subtracao
+    # Inicializa o contador do loop i com 0
+    li $t4, 0         # Carrega o valor 0 em $t4 (i = 0)
 
-incremento_multiply:
-			blt $t7, $a0 , inverte_a		# if(A[i] < 0) negativo => inverete valor do A; 
-			blt $a1, $a0, verifica_a		# if(B[i] < 0 ) verifica sianl do o A;
-			blt $a2, $a0, incremento_subtracao	# if(A[i] < 0 ) B[i] ja é maior que 0 se (verdade entao fica sinais opostos);
-			add $t0,$t0, $t7 			# PE = PE + A[i];
-			addi $t5, $t5, 1 			# j++;
-			j loop_multiply				# retorna pro loop;
-			
-incremento_soma_negativos:
-			add $t0,$t0, $t7 		# PE = PE + A[i];
-			addi $t5, $t5, 1 		# j++;
-			j loop_multiply			# retorna pro loop;
+    # Loop principal para a adição de vetores
+loop_add:
+    beq $t4, $t1, loop_sub # se i == n, pula para subtração
 
-incremento_subtracao: 
-			sub $t0,$t0, $t7 	# PE = PE - A[i];
-			addi $t5, $t5, 1 	# j++;
-			j loop_multiply		# retorna pro loop;
+    # Carrega elementos A[i] e B[i]
+    lw $t5, 0($t2)    # Carrega A[i] em $t5
+    lw $t6, 0($t3)    # Carrega B[i] em $t6
 
+    # Adiciona A[i] e B[i] e armazena em C[i]
+    add $t7, $t5, $t6 # t7 = A[i] + B[i]
+    la $t8, C         # Carrega o endereço de C em $t8
+    add $t9, $t8, $t4 # t9 = endereço de C[i]
+    sw $t7, 0($t9)    # Armazena A[i] + B[i] em C[i]
 
-incremento_main:
-		addi $t2, $t2, 4	# endereco do A += 4 (proximo elemento do vetor);
-		addi $t3, $t3, 4	# endereco do B += 4 (proximo elemento do vetor);
-		addi $t4, $t4, 1	# i++;
-		j loop_main		# retorna loop principal;
+    # Incrementa os ponteiros dos vetores e o contador do loop
+    addi $t2, $t2, 4  # Move para o próximo elemento em A
+    addi $t3, $t3, 4  # Move para o próximo elemento em B
+    addi $t4, $t4, 4  # i++
 
-end: j end
+    j loop_add        # Salta de volta para o início do loop
 
+# Loop para a subtração de vetores
+loop_sub:
+    beq $t4, $t1, calc_dot_product # se i == n, pula para produto escalar
 
+    # Carrega elementos A[i] e B[i]
+    lw $t5, 0($t2)    # Carrega A[i] em $t5
+    lw $t6, 0($t3)    # Carrega B[i] em $t6
 
-.data
+    # Subtrai B[i] de A[i] e armazena em D[i]
+    sub $t7, $t5, $t6 # t7 = A[i] - B[i]
+    la $t8, D         # Carrega o endereço de D em $t8
+    add $t9, $t8, $t4 # t9 = endereço de D[i]
+    sw $t7, 0($t9)    # Armazena A[i] - B[i] em D[i]
 
-PE:	.word	0
-n:	.word	8
-A:	.word	1 2 3 4 5 6 7 -8
-B:	.word	-8 7 -6 5 4 -3 2 -1
-C:	.word	0 0 0 0 0 0 0 0
-D:	.word	0 0 0 0 0 0 0 0
+    # Incrementa os ponteiros dos vetores e o contador do loop
+    addi $t2, $t2, 4  # Move para o próximo elemento em A
+    addi $t3, $t3, 4  # Move para o próximo elemento em B
+    addi $t4, $t4, 4  # i++
+
+    j loop_sub        # Salta de volta para o início do loop
+
+# Produto escalar
+calc_dot_product:
+    li $t4, 0         # Reinicia o contador do loop para 0
+    li $t8, 0         # Inicializa a soma do produto escalar com 0
+
+loop_dot_product:
+    beq $t4, $t1, store_pe # se i == n, pula para armazenar PE
+
+    # Carrega elementos C[i] e D[i]
+    la $t2, C         # Carrega o endereço de C em $t2
+    la $t3, D         # Carrega o endereço de D em $t3
+    lw $t5, 0($t2)    # Carrega C[i] em $t5
+    lw $t6, 0($t3)    # Carrega D[i] em $t6
+
+    # Multiplica C[i] e D[i] e acumula em t8
+    mul $t7, $t5, $t6 # t7 = C[i] * D[i]
+    add $t8, $t8, $t7 # t8 += C[i] * D[i]
+
+    # Incrementa os ponteiros dos vetores e o contador do loop
+    addi $t2, $t2, 4  # Move para o próximo elemento em C
+    addi $t3, $t3, 4  # Move para o próximo elemento em D
+    addi $t4, $t4, 4  # i++
+
+    j loop_dot_product# Salta de volta para o início do loop
+
+store_pe:
+    la $t0, PE        # Carrega o endereço de PE em $t0
+    sw $t8, 0($t0)    # Armazena o valor de PE na memória
+
+end:
+    # Fim do programa
+    j end             # Loop infinito para encerrar o programa
