@@ -1,10 +1,10 @@
 .data
-PE: .word 0
-n: .word 8
-A: .word 30, -20, 30, -40, 81, 92, 27, 26   # Exemplo de valores aleatórios para A
-B: .word 82, -70, 60, -50, 42, 39, 19, 10  # Exemplo de valores aleatórios para B
-C: .word 0, 0, 0, 0, 0, 0, 0, 0   # Vetor para armazenar A + B
-D: .word 0, 0, 0, 0, 0, 0, 0, 0   # Vetor para armazenar A - B
+PE: .word 0           # Variável para armazenar o produto escalar
+n: .word 8             # Número de elementos nos vetores A e B
+A: .word 30, -20, 30, -40, 81, 92, 27, 26   # Vetor A com valores aleatórios
+B: .word 82, -70, 60, -50, 42, 39, 19, 10  # Vetor B com valores aleatórios
+C: .word 0, 0, 0, 0, 0, 0, 0, 0   # Vetor C para armazenar A + B
+D: .word 0, 0, 0, 0, 0, 0, 0, 0   # Vetor D para armazenar A - B
 
 .text
 .globl main
