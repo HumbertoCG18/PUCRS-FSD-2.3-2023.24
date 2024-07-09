@@ -1,121 +1,99 @@
 .data
-vetor_A: .word 10, -5, 8, -3, 15, 6, -7, 4
-vetor_B: .word -2, 7, -10, 12, 3, -6, 9, -1
-vetor_C: .space 32   # Espaço para 8 inteiros (8 * 4 bytes)
-vetor_D: .space 32   # Espaço para 8 inteiros (8 * 4 bytes)
-tamanho_vetor: .word 8   # Tamanho dos vetores A e B
-resultado_PE: .word 0    # Variável para armazenar o resultado do produto escalar
+PE: .word 0
+n: .word 8
+A: .word 30, -20, 30, -40, 81, 92, 27, 26   # Exemplo de valores aleatórios para A
+B: .word 82, -70, 60, -50, 42, 39, 19, 10  # Exemplo de valores aleatórios para B
+C: .word 0, 0, 0, 0, 0, 0, 0, 0   # Vetor para armazenar A + B
+D: .word 0, 0, 0, 0, 0, 0, 0, 0   # Vetor para armazenar A - B
 
 .text
 .globl main
 
 main:
-    # Inicialização dos registradores
-    li $t0, 0             # Índice para percorrer os vetores A e B
-    la $s0, vetor_A       # Endereço do vetor A
-    la $s1, vetor_B       # Endereço do vetor B
-    la $s2, vetor_C       # Endereço do vetor C (resultado da adição)
-    la $s3, vetor_D       # Endereço do vetor D (resultado da subtração)
-    lw $s4, tamanho_vetor # Tamanho dos vetores A e B
-    
-    # Loop para inicializar os vetores C e D com zero
-    init_loop:
-        beq $t0, $s4, end_init_loop  # Se índice igual ao tamanho, sai do loop
-        
-        # Inicializa vetor C[i] com zero
-        sw $zero, 0($s2)
-        
-        # Inicializa vetor D[i] com zero
-        sw $zero, 0($s3)
-        
-        addi $t0, $t0, 1  # Incrementa o índice
-        addi $s2, $s2, 4  # Avança para o próximo elemento de C
-        addi $s3, $s3, 4  # Avança para o próximo elemento de D
-        j init_loop      # Volta ao início do loop
-    
-    end_init_loop:
-    # Chamada das sub-rotinas de adição e subtração
-    jal adicao_vetores   # Chama a sub-rotina de adição
-    jal subtracao_vetores  # Chama a sub-rotina de subtração
-    
-    # Chamada da sub-rotina de produto escalar
+    # Chamada para adicionar e subtrair vetores A e B para obter C e D
+    jal soma_vetores
+    jal subtrai_vetores
+
+    # Chamada para calcular o produto escalar entre C e D
     jal produto_escalar
-    
-    # Finaliza o programa
-    li $v0, 10
-    syscall
 
-# Sub-rotina para adicionar vetores A e B, armazenando em C
-adicao_vetores:
-    # Reinicializa o índice
-    li $t0, 0
-    
-    add_loop:
-        beq $t0, $s4, end_add_loop  # Se índice igual ao tamanho, sai do loop
-        
-        lw $s5, 0($s0)    # Carrega A[i] em $s5
-        lw $s6, 0($s1)    # Carrega B[i] em $s6
-        
-        add $s7, $s5, $s6  # Soma A[i] + B[i]
-        sw $s7, 0($s2)      # Armazena em C[i]
-        
-        addi $t0, $t0, 1   # Incrementa o índice
-        addi $s0, $s0, 4   # Avança para o próximo elemento de A
-        addi $s1, $s1, 4   # Avança para o próximo elemento de B
-        addi $s2, $s2, 4   # Avança para o próximo elemento de C
-        
-        j add_loop         # Volta ao início do loop
-    
-    end_add_loop:
-    jr $ra  # Retorna à chamada
+    # Fim do programa
+    j end
 
-# Sub-rotina para subtrair vetores A e B, armazenando em D
-subtracao_vetores:
-    # Reinicializa o índice
-    li $t0, 0
+# Sub-rotina para somar vetores A e B e armazenar em C
+soma_vetores:
+    la $t0, A     # Endereço de A
+    la $t1, B     # Endereço de B
+    la $t2, C     # Endereço de C
+    lw $t3, n     # Carrega n
     
-    sub_loop:
-        beq $t0, $s4, end_sub_loop  # Se índice igual ao tamanho, sai do loop
-        
-        lw $s5, 0($s0)    # Carrega A[i] em $s5
-        lw $s6, 0($s1)    # Carrega B[i] em $s6
-        
-        sub $s7, $s5, $s6  # Subtrai A[i] - B[i]
-        sw $s7, 0($s3)      # Armazena em D[i]
-        
-        addi $t0, $t0, 1   # Incrementa o índice
-        addi $s0, $s0, 4   # Avança para o próximo elemento de A
-        addi $s1, $s1, 4   # Avança para o próximo elemento de B
-        addi $s3, $s3, 4   # Avança para o próximo elemento de D
-        
-        j sub_loop         # Volta ao início do loop
+    li $t4, 0     # $t4 = i = 0
+
+loop_soma:
+    lw $t5, 0($t0)     # Carrega A[i]
+    lw $t6, 0($t1)     # Carrega B[i]
+    add $t7, $t5, $t6  # Calcula A[i] + B[i]
+    sw $t7, 0($t2)     # Armazena em C[i]
     
-    end_sub_loop:
-    jr $ra  # Retorna à chamada
+    addi $t0, $t0, 4   # Próximo elemento de A
+    addi $t1, $t1, 4   # Próximo elemento de B
+    addi $t2, $t2, 4   # Próximo elemento de C
+    
+    addi $t4, $t4, 1   # Incrementa i
+    blt $t4, $t3, loop_soma  # Loop se i < n
+    
+    jr $ra            # Retorna
+
+# Sub-rotina para subtrair vetores A e B e armazenar em D
+subtrai_vetores:
+    la $t0, A     # Endereço de A
+    la $t1, B     # Endereço de B
+    la $t2, D     # Endereço de D
+    lw $t3, n     # Carrega n
+    
+    li $t4, 0     # $t4 = i = 0
+
+loop_subtrai:
+    lw $t5, 0($t0)     # Carrega A[i]
+    lw $t6, 0($t1)     # Carrega B[i]
+    sub $t7, $t5, $t6  # Calcula A[i] - B[i]
+    sw $t7, 0($t2)     # Armazena em D[i]
+    
+    addi $t0, $t0, 4   # Próximo elemento de A
+    addi $t1, $t1, 4   # Próximo elemento de B
+    addi $t2, $t2, 4   # Próximo elemento de D
+    
+    addi $t4, $t4, 1   # Incrementa i
+    blt $t4, $t3, loop_subtrai  # Loop se i < n
+    
+    jr $ra            # Retorna
 
 # Sub-rotina para calcular o produto escalar entre vetores C e D
 produto_escalar:
-    # Reinicializa o índice e acumulador
-    li $t0, 0
-    li $t1, 0
+    la $t0, C     # Endereço de C
+    la $t1, D     # Endereço de D
+    lw $t2, n     # Carrega n
+    li $t3, 0     # PE = 0 (inicializa o produto escalar)
+
+    li $t4, 0     # $t4 = i = 0
+
+loop_produto:
+    lw $t5, 0($t0)     # Carrega C[i]
+    lw $t6, 0($t1)     # Carrega D[i]
+    mul $t7, $t5, $t6  # Calcula C[i] * D[i]
+    add $t3, $t3, $t7  # Acumula em PE
     
-    scalar_loop:
-        beq $t0, $s4, end_scalar_loop  # Se índice igual ao tamanho, sai do loop
-        
-        lw $s5, 0($s2)    # Carrega C[i] em $s5
-        lw $s6, 0($s3)    # Carrega D[i] em $s6
-        
-        mul $s7, $s5, $s6  # Calcula C[i] * D[i]
-        add $t1, $t1, $s7  # Acumula o resultado
-        
-        addi $t0, $t0, 1   # Incrementa o índice
-        addi $s2, $s2, 4   # Avança para o próximo elemento de C
-        addi $s3, $s3, 4   # Avança para o próximo elemento de D
-        
-        j scalar_loop      # Volta ao início do loop
+    addi $t0, $t0, 4   # Próximo elemento de C
+    addi $t1, $t1, 4   # Próximo elemento de D
     
-    end_scalar_loop:
-    # Salva o resultado do produto escalar em memória
-    sw $t1, resultado_PE
+    addi $t4, $t4, 1   # Incrementa i
+    blt $t4, $t2, loop_produto  # Loop se i < n
     
-    jr $ra  # Retorna à chamada
+    la $t8, PE         # Endereço de PE
+    sw $t3, 0($t8)     # Salva o resultado do produto escalar em PE
+    
+    jr $ra         # Retorna
+
+end:
+    # Termina o programa
+    nop
