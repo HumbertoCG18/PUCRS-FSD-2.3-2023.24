@@ -1,0 +1,23 @@
+Explicação do Código:
+Inicialização dos Vetores e Variáveis:
+
+n é o número de elementos em cada vetor.
+A e B são os vetores de entrada com valores aleatórios.
+C e D são vetores inicializados com zeros para armazenar os resultados das operações.
+Função soma_vetores:
+
+Soma cada par de elementos correspondentes dos vetores A e B e armazena o resultado no vetor C.
+Função subtrai_vetores:
+
+Subtrai cada par de elementos correspondentes dos vetores B de A e armazena o resultado no vetor D.
+Função produto_escalar:
+
+Calcula o produto escalar entre os vetores C e D, que é a soma dos produtos de seus elementos correspondentes.
+Execução das Funções:
+
+As funções soma_vetores e subtrai_vetores são chamadas para preencher os vetores C e D, respectivamente.
+A função produto_escalar é chamada para calcular e retornar o produto escalar.
+Saída dos Resultados:
+
+O valor do produto escalar é impresso.
+Os vetores C e D são impressos para verificação dos resultados das operações.
