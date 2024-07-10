@@ -109,6 +109,4 @@ positive_mult:
     
     jr $ra         # Retorna
 
-end:
-    # Termina o programa
-    nop
+end: j end
