@@ -1,10 +1,10 @@
 .data
-PE: .word 0           # Variável para armazenar o produto escalar
-n: .word 8            # Número de elementos nos vetores A e B
+PE: .word 0, 0, 0, 0, 0, 0, 0, 0   # Variável para armazenar o produto escalar
+n: .word 8                         # Número de elementos nos vetores A e B
 A: .word 30, -20, 30, -40, 81, 92, 27, 26   # Vetor A com valores aleatórios
 B: .word 82, -70, 60, -50, 42, 39, 19, 10   # Vetor B com valores aleatórios
-C: .word 0, 0, 0, 0, 0, 0, 0, 0   # Vetor C para armazenar A + B
-D: .word 0, 0, 0, 0, 0, 0, 0, 0   # Vetor D para armazenar A - B
+C: .word 0, 0, 0, 0, 0, 0, 0, 0     # Vetor C para armazenar A + B
+D: .word 0, 0, 0, 0, 0, 0, 0, 0     # Vetor D para armazenar A - B
 
 .text
 .globl main
@@ -81,32 +81,18 @@ loop_produto:
     lw $t5, 0($t0)     # Carrega C[i]
     lw $t6, 0($t1)     # Carrega D[i]
 
-    # Multiplicação manual usando soma repetida
-    li $t7, 0        # Inicializa $t7 com 0 (acumulador do produto)
-    li $t8, 0        # Inicializa $t8 com 0 (contador)
+    mul $t7, $t5, $t6   # Multiplica C[i] * D[i]
+    add $t3, $t3, $t7   # Acumula o resultado em PE
     
-    # Multiplicação C[i] * D[i]
-    abs $t9, $t6     # t9 = |D[i]|
-mult_loop:
-    beq $t8, $t9, end_mult  # Se $t8 == |D[i]|, fim da multiplicação
-    add $t7, $t7, $t5       # t7 = t7 + C[i]
-    addi $t8, $t8, 1        # t8++
-    j mult_loop             # Repetir o loop
-end_mult:
-    bgez $t6, positive_mult # Se D[i] >= 0, salta
-    sub $t7, $zero, $t7     # Se D[i] < 0, t7 = -t7
-positive_mult:
-    add $t3, $t3, $t7       # PE += t7
-
     addi $t0, $t0, 4   # Próximo elemento de C
     addi $t1, $t1, 4   # Próximo elemento de D
-    
     addi $t4, $t4, 1   # Incrementa i
     blt $t4, $t2, loop_produto  # Loop se i < n
-    
-    la $t8, PE         # Endereço de PE
+
+    # Armazena o produto escalar final em PE
+    la $t8, PE
     sw $t3, 0($t8)     # Salva o resultado do produto escalar em PE
-    
-    jr $ra         # Retorna
+
+    jr $ra     # Retorna
 
 end: j end
