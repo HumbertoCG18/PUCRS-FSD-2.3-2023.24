@@ -22,3 +22,10 @@ vmap work work
 # vmap work work 
 # Copying /soft64/mentor/ferramentas/questa/2023.4/questasim/linux_x86_64/../modelsim.ini to modelsim.ini
 # Modifying modelsim.ini
+vmap work work
+# QuestaSim-64 vmap 2023.4 Lib Mapping Utility 2023.10 Oct  9 2023
+# vmap work work 
+# Modifying modelsim.ini
+vlib work
+# ** Warning: (vlib-34) Library already exists at "work".
+# Errors: 0, Warnings: 1
