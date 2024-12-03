@@ -23,25 +23,105 @@ architecture TB of NanoCPU_TB is
         0  => X"4000",      -- iXOR R0, R0, R0       ; R0 <= 0
         1  => X"4111",      -- iXOR R1, R1, R1       ; R1 <= 0 (fib1 = 0)
         2  => X"8200",      -- iINC R2               ; R2 <= R2 + 1 (fib2 = 1)
-        3  => X"0143",      -- iREAD R3, 20          ; R3 <= MEM[20] (N)
 
-        -- Loop Start
-        4  => X"1151",      -- iWRITE R1, 21         ; MEM[21] <= R1 (store fib1)
-        5  => X"6312",      -- iADD R3, R1, R2       ; R3 = R1 + R2 (next = fib1 + fib2)
+        -- Step 1: Store fib1 and fib2 in memory
+        3  => X"1151",      -- iWRITE R1, 21         ; MEM[21] <= fib1
+        4  => X"1162",      -- iWRITE R2, 20         ; MEM[20] <= fib2
+
+        -- Compute Fibonacci numbers step by step
+        -- Step 2
+        5  => X"6312",      -- iADD R3, R1, R2       ; R3 = fib1 + fib2 (next)
         6  => X"4120",      -- iXOR R1, R2, R0       ; fib1 = fib2
         7  => X"4230",      -- iXOR R2, R3, R0       ; fib2 = next
-        8  => X"0170",      -- iREAD R0, 23          ; R0 <= MEM[23] (-1)
-        9  => X"6330",      -- iADD R3, R3, R0       ; R3 = N - 1
-        10 => X"1143",      -- iWRITE R3, 20         ; MEM[20] <= R3 (update N)
-        11 => X"4000",      -- iXOR R0, R0, R0       ; R0 <= 0
-        12 => X"7103",      -- iLESS R1, R0, R3      ; R1 = 1 if R0 < R3 else 0
-        13 => X"3044",      -- iBRANCH 4, R1         ; If R1 == 1, jump to address 4
-        14 => X"F000",      -- END                   ; Halt execution
+        8  => X"1151",      -- iWRITE R1, 21         ; MEM[21] <= fib1
+        9  => X"1162",      -- iWRITE R2, 20         ; MEM[20] <= fib2
 
-        -- Data Memory
-        20 => X"000E",      -- N = 14                ; Number of Fibonacci numbers to calculate
-        21 => X"0000",      -- Placeholder for fib1  ; Receives Fibonacci numbers
-        23 => X"FFFF",      -- Value -1              ; Used to decrement N
+        -- Step 3
+        10 => X"6312",      -- iADD R3, R1, R2       ; R3 = fib1 + fib2
+        11 => X"4120",      -- iXOR R1, R2, R0       ; fib1 = fib2
+        12 => X"4230",      -- iXOR R2, R3, R0       ; fib2 = next
+        13 => X"1151",      -- iWRITE R1, 21         ; MEM[21] <= fib1
+        14 => X"1162",      -- iWRITE R2, 20         ; MEM[20] <= fib2
+
+        -- Step 4
+        15 => X"6312",      -- iADD R3, R1, R2
+        16 => X"4120",      -- iXOR R1, R2, R0
+        17 => X"4230",      -- iXOR R2, R3, R0
+        18 => X"1151",      -- iWRITE R1, 21
+        19 => X"1162",      -- iWRITE R2, 20
+
+        -- Step 5
+        20 => X"6312",
+        21 => X"4120",
+        22 => X"4230",
+        23 => X"1151",
+        24 => X"1162",
+
+        -- Step 6
+        25 => X"6312",
+        26 => X"4120",
+        27 => X"4230",
+        28 => X"1151",
+        29 => X"1162",
+
+        -- Step 7
+        30 => X"6312",
+        31 => X"4120",
+        32 => X"4230",
+        33 => X"1151",
+        34 => X"1162",
+
+        -- Step 8
+        35 => X"6312",
+        36 => X"4120",
+        37 => X"4230",
+        38 => X"1151",
+        39 => X"1162",
+
+        -- Step 9
+        40 => X"6312",
+        41 => X"4120",
+        42 => X"4230",
+        43 => X"1151",
+        44 => X"1162",
+
+        -- Step 10
+        45 => X"6312",
+        46 => X"4120",
+        47 => X"4230",
+        48 => X"1151",
+        49 => X"1162",
+
+        -- Step 11
+        50 => X"6312",
+        51 => X"4120",
+        52 => X"4230",
+        53 => X"1151",
+        54 => X"1162",
+
+        -- Step 12
+        55 => X"6312",
+        56 => X"4120",
+        57 => X"4230",
+        58 => X"1151",
+        59 => X"1162",
+
+        -- Step 13
+        60 => X"6312",
+        61 => X"4120",
+        62 => X"4230",
+        63 => X"1151",
+        64 => X"1162",
+
+        -- Step 14
+        65 => X"6312",
+        66 => X"4120",
+        67 => X"4230",
+        68 => X"1151",
+        69 => X"1162",
+
+        -- End of Program
+        70 => X"F000",      -- END                   ; Halt execution
 
         others => (others => '0')
     );
