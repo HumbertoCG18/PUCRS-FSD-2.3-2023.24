@@ -44,9 +44,9 @@ entity NanoCPU is
 	(
 		ck, rst: in std_logic;
 		address: out std_logic_vector(7 downto 0);
-		dataR:   in  std_logic_vector(15 downto 0);
-		dataW:   out std_logic_vector(15 downto 0);
-		ce, we:  out std_logic
+		dataR: in  std_logic_vector(15 downto 0);
+		dataW: out std_logic_vector(15 downto 0);
+		ce, we: out std_logic
 	);     
 end NanoCPU;
 
@@ -86,13 +86,14 @@ begin
 	r1 : entity work.Reg16bit port map(ck => ck, rst => rst, we => wen(1), D => muxRegIn, Q => reg(1));
 	r2 : entity work.Reg16bit port map(ck => ck, rst => rst, we => wen(2), D => muxRegIn, Q => reg(2));
 	r3 : entity work.Reg16bit port map(ck => ck, rst => rst, we => wen(3), D => muxRegIn, Q => reg(3));
-
+   --complete
 
 	wen(0) <= '1' when addReg = "00" and wReg = '1' else '0';
 	wen(1) <= '1' when addReg = "01" and wReg = '1' else '0';
 	wen(2) <= '1' when addReg = "10" and wReg = '1' else '0';
 	wen(3) <= '1' when addReg = "11" and wReg = '1' else '0';
-
+   --complete
+   --complete
 
 	addReg <= IR(1 downto 0) when state = sREAD else IR(9 downto 8);   -- index of the register to write
 	muxRegIn <= dataR when state = sREAD else outalu;
@@ -135,6 +136,7 @@ begin
 	        iLESS      when ir(15 downto 12) = x"7" else
 	        iINC       when ir(15 downto 12) = x"8" else
 	        iDEC       when ir(15 downto 12) = x"9" else
+			--complete
 			iEND;
 
 	wPC <=  '1' when state = sREAD   else
@@ -161,6 +163,8 @@ begin
 				when sEXE =>
 					if inst = iREAD then
 						state <= sREAD;
+					elsif inst = iWRITE then
+						state <= sWRITE;
 					elsif inst = iEND then
 						state <= sEND;
 					elsif inst = iJMP then
