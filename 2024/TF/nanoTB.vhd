@@ -19,26 +19,34 @@ architecture TB of NanoCPU_TB is
     signal memory: memoryArray :=
 
     (
-        -- Initialize R0, R1, R2, and read N into R3
-        0  => X"4000",      -- iXOR R0, R0, R0       ; R0 <= 0
-        1  => X"4111",      -- iXOR R1, R1, R1       ; R1 <= 0 (fib1 = 0)
-        2  => X"8200",      -- iINC R2               ; R2 <= R2 + 1 (fib2 = 1)
-        3  => X"0143",      -- iREAD R3, 20          ; R3 <= MEM[20] (N)
-
-        -- Loop Start
-        4  => X"1151",      -- iWRITE R1, 21         ; MEM[21] <= fib1
-        5  => X"6312",      -- iADD R3, R1, R2       ; R3 = fib1 + fib2 (next)
-        6  => X"4120",      -- iXOR R1, R2, R0       ; fib1 = fib2
-        7  => X"4230",      -- iXOR R2, R3, R0       ; fib2 = next
-        8  => X"9300",      -- iDEC R3               ; R3 = R3 - 1 (decrement N)
-        9  => X"1143",      -- iWRITE R3, 20         ; MEM[20] <= R3 (update N)
-        10 => X"7303",      -- iLESS R3, R0, R3      ; R3 = 1 if R0 < R3 else 0
-        11 => X"3043",      -- iBRANCH 4, R3         ; If R3 == 1, jump to address 4
-        12 => X"F000",      -- END                   ; Halt execution
+        -- Program Instructions
+        -- Address => Instruction (Hex),        -- Assembly Comment
+        0   => X"0690",   -- iREAD R0, 105      ; R0 <= MEM[105] (C)
+        1   => X"0651",   -- iREAD R1, 101      ; R1 <= MEM[101] (fib1)
+        2   => X"0662",   -- iREAD R2, 102      ; R2 <= MEM[102] (fib2)
+        3   => X"0643",   -- iREAD R3, 100      ; R3 <= MEM[100] (N)
+        4   => X"7003",   -- iLESS R0, R0, R3   ; R0 = 1 if R0 < R3 else 0
+        5   => X"3070",   -- iBRANCH 7, R0      ; If R0 == 1, jump to address 7
+        6   => X"F000",   -- END                ; Halt execution
+        7   => X"1671",   -- iWRITE R1, 103     ; MEM[103 + C] <= R1 (store fib1)
+        8   => X"6312",   -- iADD R3, R1, R2    ; R3 = R1 + R2 (next)
+        9   => X"4000",   -- iXOR R0, R0, R0    ; R0 <= 0
+        10  => X"4120",   -- iXOR R1, R2, R0    ; R1 = R2
+        11  => X"4230",   -- iXOR R2, R3, R0    ; R2 = R3
+        12  => X"0690",   -- iREAD R0, 105      ; R0 <= MEM[105] (C)
+        13  => X"0683",   -- iREAD R3, 104      ; R3 <= MEM[104] (1)
+        14  => X"6003",   -- iADD R0, R0, R3    ; R0 = R0 + 1 (C = C + 1)
+        15  => X"1690",   -- iWRITE R0, 105     ; MEM[105] <= R0 (update C)
+        16  => X"1651",   -- iWRITE R1, 101     ; MEM[101] <= R1 (update fib1)
+        17  => X"1662",   -- iWRITE R2, 102     ; MEM[102] <= R2 (update fib2)
+        18  => X"2000",   -- iJMP 0             ; Jump back to address 0
 
         -- Data Memory
-        20 => X"000E",      -- N = 14                ; Number of Fibonacci numbers to calculate
-        21 => X"0000",      -- Placeholder for fib1  ; Receives Fibonacci numbers
+        100 => X"0006",   -- N = 6              ; Number of Fibonacci numbers to calculate
+        101 => X"0000",   -- fib1 = 0
+        102 => X"0001",   -- fib2 = 1
+        104 => X"0001",   -- Constant 1
+        105 => X"0000",   -- C = 0              ; Loop counter
 
         others => (others => '0')
     );
